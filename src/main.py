@@ -2,6 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 import sys
 from pathlib import Path
+
 sys.path.append(str(Path(__file__).parent.parent))
 from src.api.hotels import router as router_hotels
 from src.api.auth import router as router_auth
@@ -18,7 +19,7 @@ from fastapi_cache.backends.redis import RedisBackend
 async def lifespan(app: FastAPI):
     await redis_manager.connect()
     FastAPICache.init(RedisBackend(redis_manager.redis), prefix="fastapi-cache")
-    print('START')
+    print("START")
     yield
     await redis_manager.close()
 
@@ -32,6 +33,5 @@ app.include_router(router_bookings)
 app.include_router(router_facilities)
 
 
-
 if __name__ == "__main__":
-    uvicorn.run('main:app', reload=True)
+    uvicorn.run("main:app", reload=True)

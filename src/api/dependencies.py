@@ -20,11 +20,13 @@ def get_token(request: Request) -> str:
         raise HTTPException(status_code=401, detail="Вы не предоставили токен доступа")
     return token
 
+
 def delete_token(request: Request, response: Response) -> str:
     access_token = request.cookies.get("access_token")
     if not access_token:
         raise HTTPException(status_code=401, detail="Вы не предоставили токен доступа")
     response.delete_cookie("access_token")
+
 
 def get_current_user_id(token: str = Depends(get_token)) -> int:
     data = AuthService().decode_token(token)

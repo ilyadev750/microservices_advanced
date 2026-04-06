@@ -15,15 +15,14 @@ class BookingsRepository(BaseRepository):
     async def get_user_bookings(self, user_id):
         query = select(BookingsOrm).filter_by(user_id=user_id)
         result = await self.session.execute(query)
-        return [self.mapper.map_to_domain_entity(booking)
-                for booking in result.scalars().all()]
+        return [
+            self.mapper.map_to_domain_entity(booking)
+            for booking in result.scalars().all()
+        ]
 
     async def check_bookings(
-            self,
-            room_id: int,
-            hotel_id: int,
-            date_from: date,
-            date_to: date):
+        self, room_id: int, hotel_id: int, date_from: date, date_to: date
+    ):
         rooms_ids_to_get = rooms_ids_for_booking(
             date_from=date_from,
             date_to=date_to,
@@ -66,4 +65,3 @@ class BookingsRepository(BaseRepository):
         #     return True
         #
         # return False
-

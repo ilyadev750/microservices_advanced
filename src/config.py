@@ -7,7 +7,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class Settings(BaseSettings):
-
     MODE: Literal["TEST", "LOCAL", "DEV", "PROD"]
     model_config = SettingsConfigDict(env_file=f"{BASE_DIR}/.env")
     DB_HOST: str

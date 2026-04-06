@@ -15,16 +15,14 @@ async def get_all_facilities(db: DBDep):
 
 
 @router.post("")
-async def create_facility(db: DBDep,
-                          facility_data: FacilityAdd = Body(openapi_examples={
-        "1": {
-            "summary": "Удобство",
-            "value": {
-                "title": "Чайник"
-            }
-        },
-    })
-    ):
+async def create_facility(
+    db: DBDep,
+    facility_data: FacilityAdd = Body(
+        openapi_examples={
+            "1": {"summary": "Удобство", "value": {"title": "Чайник"}},
+        }
+    ),
+):
     await db.facilities.add(facility_data)
     await db.commit()
     return {"status": "OK", "data": facility_data}

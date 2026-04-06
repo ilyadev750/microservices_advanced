@@ -13,6 +13,7 @@ class BookingAdd(BookingAddRequest):
     price: int
     model_config = ConfigDict(from_attributes=True)
 
+
 class Booking(BookingAddRequest):
     id: int
     room_id: int
