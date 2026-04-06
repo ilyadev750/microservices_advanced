@@ -64,8 +64,8 @@ async def create_room(hotel_id: int,
         return {"status": "OK", "data": room_data}
     except IntegrityError:
         raise HTTPException(status_code=422,
-                            detail=f"Отель с указанным в запросе id не "
-                                   f"существует")
+                            detail="Отель с указанным в запросе id не "
+                                   "существует")
 
 
 @router.patch("/{hotel_id}/rooms/{room_id}")

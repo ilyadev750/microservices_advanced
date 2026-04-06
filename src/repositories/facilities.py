@@ -52,7 +52,7 @@ class RoomsFacilitiesRepository(BaseRepository):
                 await self.session.execute(add_data_stmt)
             except IntegrityError:
                 raise HTTPException(status_code=404,
-                                    detail=f"Удобство с одним из указанных id не существует!")
+                                    detail="Удобство с одним из указанных id не существует!")
 
         if delete_facility_ids:
             delete_facilities_stmt = (

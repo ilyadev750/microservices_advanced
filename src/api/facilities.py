@@ -1,9 +1,5 @@
-from datetime import date
-from fastapi import Query, Body, APIRouter
+from fastapi import Body, APIRouter
 from fastapi_cache.decorator import cache
-from src.tasks.tasks import test_task
-from sqlalchemy.exc import NoResultFound
-from fastapi import HTTPException
 from src.api.dependencies import DBDep
 from src.schemas.facilities import FacilityAdd
 

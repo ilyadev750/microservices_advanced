@@ -1,5 +1,4 @@
-from fastapi import Query, Body, APIRouter
-from sqlalchemy.exc import NoResultFound
+from fastapi import Body, APIRouter
 from fastapi import HTTPException
 from src.api.dependencies import DBDep, UserIdDep
 from src.schemas.bookings import BookingAdd, BookingAddRequest
@@ -37,7 +36,7 @@ async def create_booking(db: DBDep,
     if booking_data.date_to <= booking_data.date_from:
         raise HTTPException(
             status_code=404,
-            detail=f"Дата выезда должна быть позже, чем дата въезда"
+            detail="Дата выезда должна быть позже, чем дата въезда"
         )
     room_obj = await db.rooms.get_one_or_none(id=room_id)
     hotel_id = room_obj.hotel_id
@@ -50,7 +49,7 @@ async def create_booking(db: DBDep,
     if not is_busy_dates:
         raise HTTPException(
             status_code=500,
-            detail=f"Невозможно забронировать номер на выбранные даты!"
+            detail="Невозможно забронировать номер на выбранные даты!"
         )
 
     _booking_data = BookingAdd(user_id=user_id,
