@@ -1,8 +1,12 @@
 from fastapi import APIRouter, HTTPException, Response
 from datetime import datetime, timezone, timedelta
+
+from sqlalchemy.exc import NoResultFound
+
 from src.api.dependencies import UserIdDep, UserLogoutDep, DBDep
 from src.database import async_session_maker, async_session_maker_null_pull
 from src.schemas.users import UserRequestAdd, UserAdd
+from src.exceptions import UserAlreadyExistsException
 from passlib.context import CryptContext
 import jwt
 from src.config import settings
@@ -43,6 +47,16 @@ async def register_user(
 ):
     hashed_password = AuthService().hash_password(data.password)
     new_user_data = UserAdd(email=data.email, hashed_password=hashed_password)
+
+    try:
+        user = await db.users.get_one_or_none(email=new_user_data.email)
+        if user:
+            raise UserAlreadyExistsException
+    except UserAlreadyExistsException:
+        raise HTTPException(
+            status_code=409, detail="Пользователь с таким email уже существует!"
+        )
+
     await db.users.add(new_user_data)
     await db.commit()
 

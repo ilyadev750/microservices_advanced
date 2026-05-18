@@ -1,11 +1,12 @@
 from datetime import datetime, timezone, timedelta
 from passlib.context import CryptContext
 import jwt
+from src.services.base import BaseService
 from src.config import settings
-from fastapi import HTTPException
+from src.exceptions import ErrorTokenHTTPException
 
 
-class AuthService:
+class AuthService(BaseService):
     pwd_context = CryptContext(
         schemes=["bcrypt_sha256"],
         deprecated="auto",
@@ -34,4 +35,4 @@ class AuthService:
                 token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
             )
         except jwt.exceptions.DecodeError:
-            raise HTTPException(status_code=401, detail="Неверный токен")
+            raise ErrorTokenHTTPException

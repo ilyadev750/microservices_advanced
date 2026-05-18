@@ -1,3 +1,5 @@
+from src.exceptions import (DateFromMoreDateToException,
+                            RoomNotExistException)
 from src.repositories.base import BaseRepository
 from datetime import date
 from src.models.rooms import RoomsOrm
@@ -18,10 +20,15 @@ class RoomsRepository(BaseRepository):
     #             for room in result.scalars().all()]
 
     async def update(self, data, exclude_unset: bool = False, **filter_by):
+        values = (
+            data
+            if isinstance(data, dict)
+            else data.model_dump(exclude_unset=exclude_unset)
+        )
         stmt = (
             update(self.model)
             .filter_by(**filter_by)
-            .values(**data.model_dump(exclude_unset=exclude_unset))
+            .values(**values)
             .returning(RoomsOrm)
         )
         result = await self.session.execute(stmt)
@@ -33,6 +40,9 @@ class RoomsRepository(BaseRepository):
         date_from: date,
         date_to: date,
     ):
+
+        if date_from >= date_to:
+            raise DateFromMoreDateToException
 
         rooms_ids_to_get = rooms_ids_for_booking(date_from, date_to, hotel_id)
 
@@ -56,5 +66,5 @@ class RoomsRepository(BaseRepository):
         result = await self.session.execute(query)
         model = result.unique().scalars().one_or_none()
         if model is None:
-            return None
+            raise RoomNotExistException
         return RoomDataWithRelsMapper.map_to_domain_entity(model)

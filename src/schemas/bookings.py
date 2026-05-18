@@ -1,8 +1,9 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from datetime import date
 
 
 class BookingAddRequest(BaseModel):
+    room_id: int | None = Field(default=None, exclude=True)
     date_from: date
     date_to: date
 
