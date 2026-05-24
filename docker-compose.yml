@@ -17,6 +17,8 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - custom_network
 
   postgres:
     image: postgres:17-alpine
@@ -35,6 +37,8 @@ services:
       timeout: 5s
       retries: 10
     restart: unless-stopped
+    networks:
+      - custom_network
 
   redis:
     image: redis:8-alpine
@@ -49,7 +53,13 @@ services:
       timeout: 3s
       retries: 10
     restart: unless-stopped
+    networks:
+      - custom_network
 
 volumes:
   postgres_data:
   redis_data:
+
+networks:
+  custom_network:
+    driver: bridge

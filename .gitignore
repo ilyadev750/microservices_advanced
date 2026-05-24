@@ -25,6 +25,7 @@ wheels/
 share/python-wheels/
 *.egg-info/
 .installed.cfg
+.env-test
 *.egg
 MANIFEST
 
