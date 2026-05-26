@@ -29,7 +29,7 @@ async def create_booking(
         openapi_examples={
             "1": {
                 "summary": "Пример",
-                "value": {"date_from": "2026-04-10", "date_to": "2026-04-15"},
+                "value": {"date_from": "2026-07-26", "date_to": "2026-07-31"},
             },
         }
     ),
