@@ -1,9 +1,10 @@
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UserRequestAdd(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(min_length=7)
+    model_config = ConfigDict(extra="forbid")
 
 
 class UserAdd(BaseModel):

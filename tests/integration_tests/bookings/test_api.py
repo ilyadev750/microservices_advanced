@@ -1,4 +1,6 @@
 import pytest
+from httpx import ASGITransport, AsyncClient
+from src.main import app
 
 
 @pytest.fixture(scope="module")
@@ -61,3 +63,30 @@ async def test_add_and_get_my_bookings(
     response_my_bookings = await auth_ac.get("/bookings/me")
     assert response_my_bookings.status_code == 200
     assert len(response_my_bookings.json()) == booked_rooms
+
+
+@pytest.mark.parametrize("cookies", [{}, {"access_token": "invalid-token"}])
+@pytest.mark.parametrize(
+    "method, url, json",
+    [
+        ("get", "/bookings", None),
+        ("get", "/bookings/me", None),
+        (
+            "post",
+            "/bookings/1",
+            {"date_from": "2026-08-01", "date_to": "2026-08-10"},
+        ),
+    ],
+)
+async def test_bookings_requires_valid_access_token(cookies, method, url, json):
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+        cookies=cookies,
+    ) as ac:
+        if json is None:
+            response = await getattr(ac, method)(url)
+        else:
+            response = await getattr(ac, method)(url, json=json)
+
+    assert response.status_code == 401

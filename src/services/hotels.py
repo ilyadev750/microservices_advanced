@@ -1,4 +1,5 @@
 from datetime import date
+from sqlalchemy.exc import NoResultFound
 from src.schemas.hotels import HotelAdd, HotelPATCH
 from src.services.base import BaseService
 
@@ -36,8 +37,15 @@ class HotelService(BaseService):
         await self.db.commit()
 
     async def update_hotel_partiall(self, hotel_id: int, hotel_data: HotelPATCH, exclude_unset: bool = True):
+        if not hotel_data.model_dump(exclude_unset=exclude_unset):
+            hotel = await self.db.hotels.get_one_or_none(id=hotel_id)
+            if not hotel:
+                raise NoResultFound
+            return False
+
         await self.db.hotels.update(hotel_data, exclude_unset=exclude_unset, id=hotel_id)
         await self.db.commit()
+        return True
 
     async def delete_hotel(self, hotel_id: int):
         await self.db.hotels.delete(id=hotel_id)

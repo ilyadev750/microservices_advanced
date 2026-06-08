@@ -63,7 +63,9 @@ class BaseRepository:
             .filter_by(**filter_by)
             .values(**data.model_dump(exclude_unset=exclude_unset))
         )
-        await self.session.execute(stmt)
+        result = await self.session.execute(stmt)
+        if result.rowcount == 0:
+            raise NoResultFound
 
     async def delete(self, **filter_by):
         stmt = delete(self.model).filter_by(**filter_by)

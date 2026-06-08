@@ -3,6 +3,7 @@ from pydantic import BaseModel, ConfigDict
 
 class FacilityAdd(BaseModel):
     title: str
+    model_config = ConfigDict(extra="forbid")
 
 
 class Facility(FacilityAdd):

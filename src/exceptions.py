@@ -21,7 +21,7 @@ class UserAlreadyExistsException(BookingException):
 
 
 class DateFromMoreDateToException(BookingException):
-    detail = "Время заезда в отель меньше или равно времени выезда"
+    detail = "Дата заезда больше или равна дате выезда"
 
 
 class HotelNotExistException(BookingException):
@@ -52,12 +52,22 @@ class HotelHasRoomsHTTPException(BaseHTTPException):
 
 class RoomNotExistHTTPException(BaseHTTPException):
     status_code = 404
-    detail = 'Комната не найдена!'
+    detail = 'Номер не найден!'
+
+
+class FacilityNotExistHTTPException(BaseHTTPException):
+    status_code = 404
+    detail = 'Удобство с одним из указанных id не существует!'
 
 
 class DateFromMoreDateToHTTPException(BaseHTTPException):
     status_code = 400
-    detail = 'Дата заезда не может быть меньше или равна, чем дата выезда'
+    detail = 'Дата заезда должна быть раньше даты выезда'
+
+
+class DateEarlierThanTodayHTTPException(BaseHTTPException):
+    status_code = 400
+    detail = 'Дата заезда и выезда не может быть раньше сегодняшнего дня'
 
 
 class DatesAreBusyHTTPException(BaseHTTPException):

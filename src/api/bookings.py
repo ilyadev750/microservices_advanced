@@ -1,13 +1,17 @@
-from fastapi import Body, APIRouter
+from fastapi import Body, APIRouter, Depends
 from fastapi import HTTPException
-from src.api.dependencies import DBDep, UserIdDep
+from src.api.dependencies import DBDep, UserIdDep, get_current_user_id
 from src.exceptions import (ObjectNotFoundException,
                             RoomNotExistHTTPException)
 from src.schemas.bookings import BookingAdd, BookingAddRequest
 from src.services.bookings import BookingsService
 
 
-router = APIRouter(prefix="/bookings", tags=["Бронирования"])
+router = APIRouter(
+    prefix="/bookings",
+    tags=["Бронирования"],
+    dependencies=[Depends(get_current_user_id)],
+)
 
 
 @router.get("")

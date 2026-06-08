@@ -1,4 +1,3 @@
-from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 from src.repositories.base import BaseRepository
 from src.models.facilities import FacilitiesOrm, RoomsFacilitiesOrm
@@ -7,11 +6,17 @@ from src.schemas.facilities import RoomFacilityAdd
 from sqlalchemy import select, delete, insert
 from pydantic import BaseModel
 from src.repositories.utils import get_result_list_from_two
+from src.exceptions import FacilityNotExistHTTPException
 
 
 class FacilityRepository(BaseRepository):
     model = FacilitiesOrm
     mapper = FacilityDataMapper
+
+    async def get_existing_ids(self, ids: set[int]):
+        query = select(self.model.id).where(self.model.id.in_(ids))
+        result = await self.session.execute(query)
+        return set(result.scalars().all())
 
 
 class RoomsFacilitiesRepository(BaseRepository):
@@ -48,10 +53,7 @@ class RoomsFacilitiesRepository(BaseRepository):
                 )
                 await self.session.execute(add_data_stmt)
             except IntegrityError:
-                raise HTTPException(
-                    status_code=404,
-                    detail="Удобство с одним из указанных id не существует!",
-                )
+                raise FacilityNotExistHTTPException
 
         if delete_facility_ids:
             delete_facilities_stmt = delete(self.model).filter(

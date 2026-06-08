@@ -50,7 +50,7 @@ async def test_register_login_logout(
         )
         assert check_user_resp.status_code == status_code
 
-        logout_resp = await ac.delete(
+        logout_resp = await ac.post(
             "/auth/logout"
         )
         assert logout_resp.status_code == status_code
@@ -59,3 +59,30 @@ async def test_register_login_logout(
             "/auth/me"
         )
         assert check_user_resp.status_code == 401
+
+
+@pytest.mark.parametrize("password", ["", "123456"])
+async def test_register_user_with_short_password(ac, password):
+    register_resp = await ac.post(
+        "/auth/register",
+        json={
+            "email": "short_password@gmail.com",
+            "password": password
+        }
+    )
+
+    assert register_resp.status_code == 422
+
+
+@pytest.mark.parametrize("endpoint", ["/auth/register", "/auth/login"])
+async def test_auth_with_unknown_field(ac, endpoint):
+    response = await ac.post(
+        endpoint,
+        json={
+            "email": "unknown_field@gmail.com",
+            "password": "qwerty1",
+            "unknown_field": "unknown value"
+        }
+    )
+
+    assert response.status_code == 422

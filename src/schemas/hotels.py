@@ -1,9 +1,10 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class HotelAdd(BaseModel):
-    title: str
-    location: str
+    title: str = Field(min_length=6)
+    location: str = Field(min_length=6)
+    model_config = ConfigDict(extra="forbid")
 
 
 class Hotel(HotelAdd):
@@ -11,5 +12,6 @@ class Hotel(HotelAdd):
 
 
 class HotelPATCH(BaseModel):
-    title: str | None = Field(None)
-    location: str | None = Field(None)
+    title: str | None = Field(None, min_length=6)
+    location: str | None = Field(None, min_length=6)
+    model_config = ConfigDict(extra="forbid")

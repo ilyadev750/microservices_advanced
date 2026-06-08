@@ -34,5 +34,5 @@ class AuthService(BaseService):
             return jwt.decode(
                 token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
             )
-        except jwt.exceptions.DecodeError:
+        except jwt.exceptions.InvalidTokenError:
             raise ErrorTokenHTTPException

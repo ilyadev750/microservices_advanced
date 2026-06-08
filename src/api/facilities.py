@@ -1,11 +1,15 @@
-from fastapi import Body, APIRouter
+from fastapi import Body, APIRouter, Depends
 from fastapi_cache.decorator import cache
-from src.api.dependencies import DBDep
+from src.api.dependencies import DBDep, get_current_user_id
 from src.schemas.facilities import FacilityAdd
 from src.services.facilities import FacilitiesService
 
 
-router = APIRouter(prefix="/facilities", tags=["Удобства"])
+router = APIRouter(
+    prefix="/facilities",
+    tags=["Удобства"],
+    dependencies=[Depends(get_current_user_id)],
+)
 
 
 @router.get("")

@@ -1,6 +1,7 @@
 from types import SimpleNamespace
+from sqlalchemy.exc import IntegrityError
 from src.services.base import BaseService
-from src.exceptions import RoomNotExistHTTPException
+from src.exceptions import RoomNotExistHTTPException, FacilityNotExistHTTPException
 from src.schemas.rooms import RoomAddRequest, RoomAdd
 from src.schemas.facilities import RoomFacilityAdd
 from datetime import date
@@ -8,6 +9,17 @@ from src.repositories.utils import get_result_list_from_two
 
 
 class RoomsService(BaseService):
+    async def check_facilities_exist(self, facility_ids: list[int] | None):
+        if not facility_ids:
+            return
+
+        unique_facility_ids = set(facility_ids)
+        existing_facility_ids = await self.db.facilities.get_existing_ids(
+            unique_facility_ids
+        )
+        if existing_facility_ids != unique_facility_ids:
+            raise FacilityNotExistHTTPException
+
     async def get_filtered_by_time(
         self,
         hotel_id: int,
@@ -22,7 +34,12 @@ class RoomsService(BaseService):
         return await self.db.rooms.get_one_or_none(hotel_id=hotel_id, id=room_id)
 
     async def add_room(self, hotel_id: int, room_data: RoomAddRequest):
-        _room_data = RoomAdd(hotel_id=hotel_id, **room_data.model_dump())
+        await self.check_facilities_exist(room_data.facilities_ids)
+
+        _room_data = RoomAdd(
+            hotel_id=hotel_id,
+            **room_data.model_dump(exclude={"facilities_ids"}),
+        )
         room = await self.db.rooms.add(_room_data)
 
         if room_data.facilities_ids:
@@ -30,7 +47,10 @@ class RoomsService(BaseService):
                 RoomFacilityAdd(room_id=room.id, facility_id=f_id)
                 for f_id in room_data.facilities_ids
             ]
-            await self.db.rooms_facilities.add_bulk(rooms_facilities_data)
+            try:
+                await self.db.rooms_facilities.add_bulk(rooms_facilities_data)
+            except IntegrityError:
+                raise FacilityNotExistHTTPException
         await self.db.commit()
         return room_data
 
@@ -42,6 +62,8 @@ class RoomsService(BaseService):
         facility_ids: list[int] | None = None,
         exclude_unset: bool = False,
     ):
+        await self.check_facilities_exist(facility_ids)
+
         room_values = room_data.model_dump(
             exclude_unset=exclude_unset,
             exclude_none=exclude_unset,

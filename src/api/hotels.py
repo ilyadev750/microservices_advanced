@@ -1,15 +1,21 @@
 from datetime import date
-from fastapi import Query, Body, APIRouter
+from fastapi import Query, Body, APIRouter, Depends, Response, status
 from sqlalchemy.exc import IntegrityError, NoResultFound
-from src.exceptions import (DateFromMoreDateToHTTPException,
+from src.exceptions import (DateFromMoreDateToException,
+                            DateFromMoreDateToHTTPException,
+                            DateEarlierThanTodayHTTPException,
                             HotelHasRoomsHTTPException,
                             HotelNotExistHTTPException)
-from src.api.dependencies import PaginationDep, DBDep
+from src.api.dependencies import PaginationDep, DBDep, get_current_user_id
 from src.schemas.hotels import HotelAdd, HotelPATCH
 from src.services.hotels import HotelService
 
 
-router = APIRouter(prefix="/hotels", tags=["Отели"])
+router = APIRouter(
+    prefix="/hotels",
+    tags=["Отели"],
+    dependencies=[Depends(get_current_user_id)],
+)
 
 
 @router.get("")
@@ -22,6 +28,9 @@ async def get_hotels(
     date_to: date = Query(example="2026-08-04"),
 ):
     per_page = pagination.per_page or 5
+
+    if date_from < date.today() or date_to < date.today():
+        raise DateEarlierThanTodayHTTPException
 
     try:
         result = await HotelService(db).get_filtered_by_time(
@@ -78,13 +87,23 @@ async def delete_hotel(hotel_id: int, db: DBDep):
 
 @router.patch("/{hotel_id}")
 async def update_hotel_partial(hotel_id: int, db: DBDep, hotel_data: HotelPATCH):
-    await HotelService(db).update_hotel_partiall(hotel_data=hotel_data, exclude_unset=True, hotel_id=hotel_id)
-    await db.commit()
+    try:
+        is_updated = await HotelService(db).update_hotel_partiall(
+            hotel_data=hotel_data, exclude_unset=True, hotel_id=hotel_id
+        )
+    except NoResultFound:
+        raise HotelNotExistHTTPException
+    if not is_updated:
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     return {"status": "OK"}
 
 
 @router.put("/{hotel_id}")
 async def update_hotel_full(hotel_id: int, db: DBDep, hotel_data: HotelAdd):
-    await HotelService(db).update_hotel_full(hotel_data=hotel_data, hotel_id=hotel_id)
-    await db.commit()
+    try:
+        await HotelService(db).update_hotel_full(
+            hotel_data=hotel_data, hotel_id=hotel_id
+        )
+    except NoResultFound:
+        raise HotelNotExistHTTPException
     return {"status": "OK"}

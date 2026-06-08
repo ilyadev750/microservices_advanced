@@ -2,6 +2,7 @@ from typing import Annotated
 from fastapi import Depends, Query, HTTPException, Request, Response
 from pydantic import BaseModel
 from src.database import async_session_maker
+from src.exceptions import ErrorTokenHTTPException
 from src.services.auth import AuthService
 from src.utils.db_manager import DBManager
 
@@ -30,7 +31,10 @@ def delete_token(request: Request, response: Response) -> str:
 
 def get_current_user_id(token: str = Depends(get_token)) -> int:
     data = AuthService().decode_token(token)
-    return data["user_id"]
+    try:
+        return data["user_id"]
+    except KeyError:
+        raise ErrorTokenHTTPException
 
 
 UserIdDep = Annotated[int, Depends(get_current_user_id)]
