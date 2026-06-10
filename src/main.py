@@ -26,6 +26,23 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    return """
+    <html>
+        <head>
+            <title>ilia-petrov.xyz</title>
+        </head>
+        <body>
+            <h1>Welcome to ilia-petrov.xyz</h1>
+            <p>Booking API is running.</p>
+            <p><a href="/docs">Open API Docs</a></p>
+        </body>
+    </html>
+    """
+
+
 app.include_router(router_auth)
 app.include_router(router_hotels)
 app.include_router(router_rooms)

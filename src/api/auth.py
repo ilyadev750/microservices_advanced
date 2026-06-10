@@ -91,8 +91,3 @@ async def logout(
     user_loguot: UserLogoutDep,
 ):
     return {"success": "Вы успешно вышли из системы!"}
-
-
-@router.get("/")
-def root():
-    return {"message": "API is running"}
