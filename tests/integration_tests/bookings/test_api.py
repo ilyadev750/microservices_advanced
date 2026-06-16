@@ -10,6 +10,7 @@ async def after_test(db_module):
 
 
 @pytest.mark.parametrize("room_id, date_from, date_to, status_code", [
+    (1, "2000-01-01", "2000-01-02", 400),
     (1, "2026-08-01", "2026-08-10", 200),
     (1, "2026-08-09", "2026-08-11", 200),
     (1, "2026-08-03", "2026-08-12", 200),

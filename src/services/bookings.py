@@ -1,12 +1,14 @@
+from datetime import date
+
 from src.services.base import BaseService
 from src.schemas.bookings import BookingAdd, BookingAddRequest
 from src.exceptions import (
     DateFromMoreDateToHTTPException,
+    DateEarlierThanTodayHTTPException,
     ObjectNotFoundException,
     RoomNotExistHTTPException,
     DatesAreBusyHTTPException,
 )
-from src.schemas.bookings import BookingAdd
 
 
 class BookingsService(BaseService):
@@ -18,7 +20,10 @@ class BookingsService(BaseService):
         return await self.db.bookings.get_user_bookings(user_id=user_id)
 
     async def create_booking(self, user_id: int, room_id: int, booking_data: BookingAddRequest):
-        
+
+        if booking_data.date_from < date.today() or booking_data.date_to < date.today():
+            raise DateEarlierThanTodayHTTPException
+
         if booking_data.date_to <= booking_data.date_from:
             raise DateFromMoreDateToHTTPException
 
